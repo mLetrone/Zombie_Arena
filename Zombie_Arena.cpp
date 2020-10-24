@@ -11,11 +11,13 @@ using namespace sf;
 // Game in four states 
 enum class GameState
 {
-    PAUSED, LEVEL_UP, GAME_OVER, PLAYING
+    PAUSED, LEVEL_UP, GAME_OVER, PLAYING, INIT
 };
 
 int main()
 {
+
+    TextureHolder holder;
     // At the beginning, start with GAME_OVER state
     GameState gameState = GameState::GAME_OVER;
 
@@ -45,12 +47,32 @@ int main()
 
     //create the background
     VertexArray background;
-    Texture backgroundTexture;
-    backgroundTexture.loadFromFile("graphics/background_sheet.png");
+    Texture backgroundTexture = TextureHolder::getTexture("graphics/background_sheet.png");
+    
+    // Prepare for a horde of zombies
+    int numZombies;
+    int numZombiesAlive;
+    std::vector<std::shared_ptr<Zombie>> zombies;
 
+
+    // Bullet variables
+    std::vector<Bullet> bullets;
+    bullets.resize(100);
+    int currentBullet = 0,
+        bulletSpare = 24,
+        bulletInClip = 6,
+        clipSize = 6;
+    float fireRate = 10;
+    Time lastPressed;
+
+    // Transform the mouse as a crosshair
+    window.setMouseCursorVisible(false);
+    Sprite crosshairSprite;
+    Texture crosshairTexture = TextureHolder::getTexture("graphics/crosshair.png");
+    crosshairSprite.setTexture(crosshairTexture);
+    crosshairSprite.setOrigin(25, 25);
     // init random seed 
     InitRandom();
-
     while (window.isOpen())
     {
 
@@ -64,27 +86,40 @@ int main()
         while (window.pollEvent(event)) {
             if (event.type == Event::KeyPressed) {
                 if (event.key.code == Keyboard::Return) {
-
+                    // pause a game
                     if (gameState == GameState::PLAYING)
                         gameState = GameState::PAUSED;
-
+                    // restart a paused game
                     else if (gameState == GameState::PAUSED) {
                         gameState = GameState::PLAYING;
                         clock.restart();
                     }
-
                     else if (gameState == GameState::GAME_OVER)
-                        gameState = GameState::LEVEL_UP;
+                        gameState = GameState::INIT;
 
 
                 }
 
             }
             if (gameState == GameState::PLAYING) {
-
+                if (event.key.code == Keyboard::R)
+                {
+                    if (bulletSpare >= clipSize) {
+                        // Fully reload the clip
+                        bulletInClip = clipSize;
+                        bulletSpare -= clipSize;
+                    }
+                    else if (bulletSpare > 0) {
+                        // few bullets left
+                        bulletInClip = bulletSpare;
+                        bulletSpare = 0;
+                    }
+                    else {}
+                }
             }
         }
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+            gameState = GameState::GAME_OVER;
             window.close();
         }
 
@@ -110,19 +145,45 @@ int main()
             else
                 player.stopDown();
 
+            // fire bullet
+            if (Mouse::isButtonPressed(Mouse::Left)) {
+                if (bulletInClip > 0 &&
+                    (gameTotalTime.asMilliseconds() - lastPressed.asMilliseconds() >= 1000 / fireRate)) {
+                    bullets[currentBullet].shoot(player.getCenter().x, player.getCenter().y,
+                        mouseWorldPosition.x, mouseWorldPosition.y);
+                    currentBullet = (currentBullet <99)? currentBullet+1: 0;
+
+                    lastPressed = gameTotalTime;
+
+                    bulletInClip--;
+
+                }
+            }
+
         }
 
-        if (gameState == GameState::LEVEL_UP) {
-            // Handle all keyboard::NumX, 1 to 9 using their value
-            if (event.key.code >= 27 && event.key.code <= 35)
+        if (gameState == GameState::INIT) {
                 gameState = GameState::PLAYING;
 
             if (gameState == GameState::PLAYING) {
-                arena.width = 500;
-                arena.height = 500;
+                arena.width = 1000;
+                arena.height = 1000;
                 arena.left = 0;
                 arena.top = 0;
 
+                numZombies = 10;
+                try
+                {
+                    zombies.clear();
+                    zombies.resize(numZombies);
+                }
+                catch (const std::exception&)
+                {
+                    cout << "OUCH " << endl;
+                }
+               
+                zombies = createHorde(numZombies, arena);
+                numZombiesAlive = numZombies;
                 int tileSize = CreateBackground(background, arena);
                 player.spawn(arena, resolution, tileSize);
 
@@ -145,11 +206,53 @@ int main()
             // Convert mouse position to world coordinates of mainView
             mouseWorldPosition = window.mapPixelToCoords(mouseScreenPosition, mainView);
 
+            // set crosshair position to mouse world location
+            crosshairSprite.setPosition(mouseWorldPosition);
+
             player.update(dt.asSeconds(), mouseScreenPosition);
 
             Vector2f playerPosition(player.getCenter());
 
             mainView.setCenter(playerPosition);
+
+            for (int i = 0; i < numZombies; i++) {
+                if (zombies[i]->isAlive())
+                    zombies[i]->update(dt.asSeconds(), playerPosition);
+            }
+
+            // update bullets that are shooted
+            for (int i = 0; i < bullets.size(); i++) {
+                if (bullets[i].isShooted())
+                    bullets[i].update(dt.asSeconds());
+            }
+
+            for (int i=0; i < bullets.size(); i++)
+            {
+                    for (int j = 0; j < zombies.size(); j++) {
+     
+                        if (bullets[i].isShooted() && zombies[j]->isAlive()) {
+                           
+                            if (bullets[i].getPOsition().intersects(zombies[j]->getPosition()))
+                            {
+                                bullets[i].stop();
+                          
+                                if (zombies[j]->hit()) {
+                                    // score+=10;
+                                    numZombiesAlive--;
+                                }
+                                if (numZombiesAlive == 0) {
+                                    gameState = GameState::INIT;
+                                }
+
+                            }
+
+
+                        }
+                    }
+               
+                
+            }// end bullet/zombie collision
+
         }
 
         /*
@@ -165,6 +268,16 @@ int main()
             // so draw everything related to it
             window.setView(mainView);
             window.draw(background, &backgroundTexture);
+            //draw zombies
+            for (int i = 0; i < numZombies; i++)
+                window.draw(zombies[i]->getSprite());
+
+            // draw bullets
+            for (int i = 0; i < 100; i++) {
+                if (bullets[i].isShooted())
+                    window.draw(bullets[i].getShape());
+            }
+            window.draw(crosshairSprite);
             window.draw(player.getSprite());
 
             window.display();
