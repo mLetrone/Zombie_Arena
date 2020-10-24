@@ -6,6 +6,7 @@
 using namespace sf;
 //Local import
 #include "Player.hpp"
+#include "Bullet.hpp"
 #include "Zombie_Arena.hpp"
 
 // Game in four states 
@@ -252,6 +253,22 @@ int main()
                
                 
             }// end bullet/zombie collision
+
+            // have zombie touched player
+            for (int i = 0; i < numZombies; i++) {
+                
+                if (player.getPosition().intersects(zombies[i]->getPosition()) 
+                    && (zombies[i]->isAlive())) {
+                    if (player.hit(gameTotalTime, zombies[i])) {
+
+                    }
+
+                    else if (player.getHealth() <= 0) {
+                        gameState = GameState::GAME_OVER;
+                        cout << "player is dead" << endl;
+                    }
+                }
+            }
 
         }
 

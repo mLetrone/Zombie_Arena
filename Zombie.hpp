@@ -12,6 +12,7 @@ protected:
 	float m_health;
 	float m_speed;
 	bool m_isAlive;
+	float m_damage;
 
 public:
 	bool hit();
@@ -20,8 +21,8 @@ public:
 
 	FloatRect getPosition() const { return m_sprite.getGlobalBounds(); }
 	Sprite getSprite() const { return m_sprite; }
+	float getDamage() const { return m_damage; }
 	void update(const float& dt, const Vector2f& playerLocation);
-
 	virtual std::shared_ptr<Zombie> clone() = 0;
 };
 
