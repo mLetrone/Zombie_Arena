@@ -1,6 +1,7 @@
 
 // Standard libraries
 #include <iostream>
+#include <sstream>
 // SFML libraries
 #include <SFML/Graphics.hpp>
 using namespace sf;
@@ -15,6 +16,9 @@ enum class GameState
 {
     PAUSED, LEVEL_UP, GAME_OVER, PLAYING, INIT
 };
+
+void setTextConfig(sf::Text& text,const Font& font,
+    const int& size, const Color& color, const Vector2i& position, const string& mess );
 
 int main()
 {
@@ -73,8 +77,57 @@ int main()
     Texture crosshairTexture = TextureHolder::getTexture("graphics/crosshair.png");
     crosshairSprite.setTexture(crosshairTexture);
     crosshairSprite.setOrigin(25, 25);
+
+    //Pickups 
     unique_ptr<Pickup> healthPickup(new Pickup(1));
     unique_ptr<Pickup> ammoPickup(new Pickup(2));
+
+    // UX
+    View hudView(FloatRect(0, 0, resolution.x, resolution.y));
+    int score(0),
+        hiscore(0);
+
+    Sprite GameOverSprite, ammoSprite;
+    GameOverSprite.setTexture(TextureHolder::getTexture("graphics/background.png"));
+    GameOverSprite.setPosition(0, 0);
+
+    ammoSprite.setTexture(TextureHolder::getTexture("graphics/ammo_icon.png"));
+    ammoSprite.setPosition(20, 980);
+
+    Font font;
+    font.loadFromFile("fonts/zombiecontrol.ttf");
+
+    Text pausedText,
+        gameOverText,
+        ammoText,
+        scoreText,
+        hiscoreText,
+        zombieRemainingText,
+        waveText;
+
+    stringstream ss;
+    ss <<"High Score :" << hiscore;
+
+    setTextConfig(pausedText, font, 155, Color::White,
+        Vector2i(400, 400), " Press Enter \nto continue");
+    setTextConfig(gameOverText, font, 125, Color::Red,
+        Vector2i(250,850), "Press Enter to play");
+    setTextConfig(ammoText, font, 55, Color::White,
+        Vector2i(200, 980), "");
+    setTextConfig(scoreText, font, 55, Color::White,
+        Vector2i(20, 0), "");
+    setTextConfig(hiscoreText, font, 55, Color::White,
+        Vector2i(1400, 0), ss.str());
+    ss.clear(); ss.str(string());
+    setTextConfig(zombieRemainingText, font, 55, Color::White,
+        Vector2i(1500, 980), "zombies: 100");
+
+    // Health bar
+    RectangleShape healthBar;
+    healthBar.setFillColor(Color::Red);
+    healthBar.setPosition(450, 980);
+
+
     // init random seed 
     InitRandom();
     while (window.isOpen())
@@ -235,6 +288,7 @@ int main()
             // update pickups
             healthPickup->update(dt.asSeconds());
             ammoPickup->update(dt.asSeconds());
+
             for (int i=0; i < bullets.size(); i++)
             {
                     for (int j = 0; j < zombies.size(); j++) {
@@ -246,7 +300,7 @@ int main()
                                 bullets[i].stop();
                           
                                 if (zombies[j]->hit()) {
-                                    // score+=10;
+                                    score+=10;
                                     numZombiesAlive--;
                                 }
                                 if (numZombiesAlive == 0) {
@@ -286,6 +340,19 @@ int main()
                 ammoPickup->isSpawned())
                 bulletSpare += ammoPickup->gotIt();
              
+            healthBar.setSize(Vector2f(player.getHealth() * 3, 50));
+
+            
+                stringstream ammoSS;
+                ammoSS << bulletInClip << " / " << bulletSpare;
+                ammoText.setString(ammoSS.str());
+                stringstream scoreSS;
+                scoreSS << "Score: " << score;
+                scoreText.setString(scoreSS.str());
+                stringstream zombieSS;
+                 zombieSS<< "zombies: " << numZombiesAlive;
+                zombieRemainingText.setString(zombieSS.str());
+                
         }
 
         /*
@@ -321,10 +388,30 @@ int main()
             window.draw(crosshairSprite);
             window.draw(player.getSprite());
 
-            window.display();
+            window.setView(hudView);
+            window.draw(ammoSprite);
+            window.draw(ammoText);
+            window.draw(scoreText);
+            window.draw(healthBar);
+            window.draw(zombieRemainingText);
+           
         }
-
+        else if (gameState == GameState::GAME_OVER) {
+            window.draw(GameOverSprite);
+            window.draw(gameOverText);
+        }
+        window.display();
     }//While game is running
 
     return 0;
+}
+
+
+void setTextConfig(sf::Text& text, const Font& font, const int& size, const Color& color, const Vector2i& position, const string& mess)
+{
+    text.setFont(font);
+    text.setCharacterSize(size);
+    text.setFillColor(color);
+    text.setPosition(position.x, position.y);
+    text.setString(mess);
 }
