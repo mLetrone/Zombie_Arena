@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "player.hpp"
 
 Player::Player()
@@ -8,7 +10,7 @@ Player::Player()
 
 	// Associate a texture with the sprite
 	// !!Watch this space!!
-	m_texture.loadFromFile("graphics/player.png");
+	m_texture = TextureHolder::getTexture("graphics/player.png");
 	m_sprite.setTexture(m_texture);
 
 	// Set the origin of the sprite to the centre, 
@@ -44,12 +46,13 @@ Time Player::getLastHitTime()
 	return m_lastHit;
 }
 
-bool Player::hit(Time timeHit)
+bool Player::hit(Time timeHit, const std::shared_ptr<Zombie>& zomb)
 {
-	if (timeHit.asMilliseconds() - m_lastHit.asMilliseconds() > 200)// 2 tenths of second
+	if (timeHit.asMilliseconds() - m_lastHit.asMilliseconds() > 300)// 3 tenths of second
 	{
 		m_lastHit = timeHit;
-		m_health -= 10;
+		m_health -= zomb->getDamage();
+		cout << "player bitten by zombie, lost " << zomb->getDamage() << " hp" << endl;
 		return true;
 	}
 	else
@@ -124,6 +127,7 @@ void Player::upgradeHealth()
 	m_maxHealth += (START_HEALTH * .2);
 
 }
+
 
 void Player::increaseHealthLevel(int amount)
 {

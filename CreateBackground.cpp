@@ -1,5 +1,5 @@
 #include "Zombie_Arena.hpp"
-
+#include <iostream>
 
 #define TILE_SIZE 50
 #define TILE_TYPES 3
@@ -64,4 +64,41 @@ int CreateBackground(VertexArray& rVA, IntRect arena) {
 	}
 
 	return TILE_SIZE;
+}
+
+std::vector<std::shared_ptr<Zombie>> createHorde(int numZombies, IntRect arena) {
+	std::vector<std::shared_ptr<Zombie>> zombies;
+	zombies.resize(numZombies);
+	ZombieFactory factory;
+	int maxY = arena.height - 20;
+	int minY = arena.top + 20;
+	int maxX = arena.width - 20;
+	int minX = arena.left - 20;
+	for (int i = 0; i < numZombies; i++) {
+		//Which side the zombie will spawn
+		int side = nb_randint(0, 3);
+		float x, y;
+		switch (side)
+		{
+		case 0: //left
+			x = minX;
+			y = float(nb_randint(minY, maxY));
+			break;
+		case 1: //Right
+			x = maxX;
+			y = float(nb_randint(minY, maxY));
+			break;
+		case 2: //top
+			x = float(nb_randint(minX, maxX));
+			y = minY;
+			break;
+		case 3: //bottom
+			x = float(nb_randint(minX, maxX));
+			y = maxY;
+		}
+		std::cout << "ERROR createHord " << side << " " << i << std::endl;
+		zombies[i] = factory.create(nb_randint(0,2));
+		zombies[i]->spawn(x, y);
+	}
+	return zombies;
 }

@@ -1,6 +1,9 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <memory>
 using namespace sf;
+#include "TextureHolder.hpp"
+#include "Zombie.hpp"
 
 class Player{
 private:
@@ -35,10 +38,9 @@ public:
 	void increaseHealthLevel(int amount);
 	void upgradeSpeed();
 	void upgradeHealth();
-
 	void resetPlayerStats();
 
-	bool hit(Time timehit);
+	bool hit(Time timehit, const std::shared_ptr<Zombie>& zomb);
 	
 	// Getter & setter
 	Time getLastHitTime();
