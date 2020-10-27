@@ -7,6 +7,7 @@ using namespace sf;
 //Local import
 #include "Player.hpp"
 #include "Bullet.hpp"
+#include "Pickup.hpp"
 #include "Zombie_Arena.hpp"
 
 // Game in four states 
@@ -72,6 +73,8 @@ int main()
     Texture crosshairTexture = TextureHolder::getTexture("graphics/crosshair.png");
     crosshairSprite.setTexture(crosshairTexture);
     crosshairSprite.setOrigin(25, 25);
+    unique_ptr<Pickup> healthPickup(new Pickup(1));
+    unique_ptr<Pickup> ammoPickup(new Pickup(2));
     // init random seed 
     InitRandom();
     while (window.isOpen())
@@ -187,6 +190,8 @@ int main()
                 numZombiesAlive = numZombies;
                 int tileSize = CreateBackground(background, arena);
                 player.spawn(arena, resolution, tileSize);
+                healthPickup->setArena(arena);
+                ammoPickup->setArena(arena);
 
                 clock.restart();
             }
@@ -227,6 +232,9 @@ int main()
                     bullets[i].update(dt.asSeconds());
             }
 
+            // update pickups
+            healthPickup->update(dt.asSeconds());
+            ammoPickup->update(dt.asSeconds());
             for (int i=0; i < bullets.size(); i++)
             {
                     for (int j = 0; j < zombies.size(); j++) {
@@ -270,6 +278,14 @@ int main()
                 }
             }
 
+            if (player.getPosition().intersects(healthPickup->getPosition()) &&
+                healthPickup->isSpawned())
+                player.increaseHealthLevel(healthPickup->gotIt());
+
+            if (player.getPosition().intersects(ammoPickup->getPosition()) &&
+                ammoPickup->isSpawned())
+                bulletSpare += ammoPickup->gotIt();
+             
         }
 
         /*
@@ -294,6 +310,14 @@ int main()
                 if (bullets[i].isShooted())
                     window.draw(bullets[i].getShape());
             }
+
+            // draw pickups
+            if (healthPickup->isSpawned())
+                window.draw(healthPickup->getSprite());
+
+            if (ammoPickup->isSpawned())
+                window.draw(ammoPickup->getSprite());
+
             window.draw(crosshairSprite);
             window.draw(player.getSprite());
 
