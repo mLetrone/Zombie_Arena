@@ -68,3 +68,10 @@ void Bullet::update(float dt)
 		m_isShooted = false;
 	}
 }
+/*
++----------+            +----------------+		
+|  Bullet  |----------<>|      Weapon    |		  +----------+
++----------+            | clip and spare |------<>|  Player  |
+						+----------------+		  +----------+
+							
+*/

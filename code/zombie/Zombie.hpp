@@ -2,8 +2,6 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 using namespace sf;
-#include "TextureHolder.hpp"
-
 
 class Zombie{
 protected:

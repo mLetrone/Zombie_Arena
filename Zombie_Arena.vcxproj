@@ -18,6 +18,40 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="code\Engine\Draw.cpp" />
+    <ClCompile Include="code\Engine\Input.cpp" />
+    <ClCompile Include="code\Engine\Update.cpp" />
+    <ClCompile Include="code\zombie\Bloater.cpp" />
+    <ClCompile Include="code\player\Bullet.cpp" />
+    <ClCompile Include="code\zombie\Chaser.cpp" />
+    <ClCompile Include="code\zombie\Crawler.cpp" />
+    <ClCompile Include="code\utils\CreateBackground.cpp" />
+    <ClCompile Include="code\game elements\Pickup.cpp" />
+    <ClCompile Include="code\player\Player.cpp" />
+    <ClCompile Include="code\utils\Random.cpp" />
+    <ClCompile Include="code\utils\TextureHolder.cpp" />
+    <ClCompile Include="code\zombie\Zombie.cpp" />
+    <ClCompile Include="code\zombie\ZombieFactory.cpp" />
+    <ClCompile Include="code\Main.cpp" />
+    <ClCompile Include="code\Engine\Engine.cpp" />
+    <ClCompile Include="code\player\Weapon.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="code\zombie\Bloater.hpp" />
+    <ClInclude Include="code\player\Bullet.hpp" />
+    <ClInclude Include="code\zombie\Chaser.hpp" />
+    <ClInclude Include="code\zombie\Crawler.hpp" />
+    <ClInclude Include="code\game elements\Pickup.hpp" />
+    <ClInclude Include="code\player\Player.hpp" />
+    <ClInclude Include="code\utils\Random.hpp" />
+    <ClInclude Include="code\utils\TextureHolder.hpp" />
+    <ClInclude Include="code\zombie\Zombie.hpp" />
+    <ClInclude Include="code\zombie\ZombieFactory.hpp" />
+    <ClInclude Include="code\utils\Zombie_Arena.hpp" />
+    <ClInclude Include="code\Engine\Engine.hpp" />
+    <ClInclude Include="code\player\Weapon.hpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{4F0F9C0B-B726-41B1-B472-AB2617CA03EE}</ProjectGuid>
@@ -151,17 +185,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\Timber\Random.cpp" />
-    <ClCompile Include="CreateBackground.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Zombie_Arena.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Timber\Random.hpp" />
-    <ClInclude Include="Player.hpp" />
-    <ClInclude Include="Zombie_Arena.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
