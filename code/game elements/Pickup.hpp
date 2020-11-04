@@ -4,6 +4,7 @@ using namespace sf;
 
 class Pickup{
 private:
+	// voir pour refacto héritage
 	const int HEALTH_START_VALUE = 50; // health item
 	const int AMMO_START_VALUE = 12; // ammo item
 	const int START_WAIT_TIME = 10;

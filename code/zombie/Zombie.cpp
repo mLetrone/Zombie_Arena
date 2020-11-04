@@ -1,4 +1,6 @@
 #include "Zombie.hpp"
+#include "../utils/TextureHolder.hpp"
+
 #include <cmath>
 
 
@@ -14,7 +16,7 @@ bool Zombie::hit() {
 
 	if (m_health == 0) {
 		m_isAlive = false;
-		m_sprite.setTexture(TextureHolder::getTexture("graphics/blood.png"));
+		m_sprite.setTexture(TextureHolder::getTexture("assets/graphics/blood.png"));
 		return true;
 	}
 	return false;

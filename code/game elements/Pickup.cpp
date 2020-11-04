@@ -1,11 +1,12 @@
 #include "Pickup.hpp"
-#include "TextureHolder.hpp"
-#include "Random.hpp"
+#include <string>
+#include "../utils/TextureHolder.hpp"
+#include "../utils/Random.hpp"
 
 Pickup::Pickup(int type){
 	m_type = type;
-	string texture = (m_type == 1) ? "graphics/health_pickup.png" :
-		"graphics/ammo_pickup.png";
+	std::string texture = (m_type == 1) ? "assets/graphics/health_pickup.png" :
+		"assets/graphics/ammo_pickup.png";
 	m_value = (m_type == 1) ? HEALTH_START_VALUE : AMMO_START_VALUE;
 	m_sprite = Sprite(TextureHolder::getTexture(texture));
 
